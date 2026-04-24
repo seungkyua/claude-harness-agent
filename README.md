@@ -63,10 +63,31 @@ source .venv/bin/activate
 # 의존성 설치 (editable install)
 pip install -e .
 
-# API 키
-cp .env.example .env
-# .env 를 열어서 ANTHROPIC_API_KEY 에 실제 키 입력
+# 인증 (아래 둘 중 하나만 고른다)
 ```
+
+### 인증: API 키 vs OAuth 세션
+
+hermes 는 자식 프로세스로 `claude` CLI 를 띄우고, CLI 가 다음 두 경로 중 하나로 인증한다.
+
+1. **API 키 (환경변수)** — `ANTHROPIC_API_KEY` 가 환경에 있으면 그 키로 인증한다.
+   ```bash
+   cp .env.example .env
+   # .env 를 열어서 ANTHROPIC_API_KEY=sk-ant-api03-... 실제 키로 교체
+   ```
+2. **OAuth 세션 (Claude Code 로그인)** — `.env` 에 API 키를 **두지 않으면** hermes 는
+   `ANTHROPIC_API_KEY` 를 환경에 올리지 않고, `claude` CLI 가 이미 `claude login`
+   으로 만들어둔 OAuth 세션을 그대로 사용한다. 대부분의 경우 가장 편하다.
+   ```bash
+   claude login          # 브라우저로 Anthropic 로그인 (Pro/Max 플랜 포함)
+   # .env 는 아예 만들지 않거나, ANTHROPIC_API_KEY 라인을 비워두거나 주석처리
+   ```
+
+> 안전장치: `.env` 에 `ANTHROPIC_API_KEY=sk-ant-...` 같은 placeholder 가 남아
+> 있으면 hermes 가 시작 시 자동 감지해 제거하고 노란색 경고를 띄운 뒤 OAuth
+> 세션으로 fallback 한다. 잘못된 키로 CLI 가 조용히 exit 하는 사고를 막기 위함.
+
+### Claude CLI + Node
 
 Claude Agent SDK 는 Node.js 로 실행되는 Claude Code CLI 를 내부적으로 호출한다.
 먼저 다음이 PATH 에 있어야 한다.
@@ -195,7 +216,12 @@ brief.md ──► Planner ──► spec.md
 ## 트러블슈팅
 
 - `claude: command not found` → 위의 `npm install -g @anthropic-ai/claude-code`.
-- `ANTHROPIC_API_KEY not set` → `.env` 확인, 또는 쉘에 export.
+- **Planner 가 1 turn, $0 에서 즉시 죽고 stderr 가 비어있다** → `.env` 의
+  `ANTHROPIC_API_KEY` 가 placeholder 거나 만료된 키. hermes 가 자동으로 제거하지만,
+  수동으로 확실히 하려면 해당 라인을 삭제하고 `claude login` 상태만 유지한다.
+  OAuth 세션을 쓰려면 `.env` 에 `ANTHROPIC_API_KEY` 자체가 없어야 한다.
+- `ANTHROPIC_API_KEY not set` 이라는 별도 에러는 실제로 뜨지 않는다.
+  CLI 는 API 키가 없으면 OAuth 세션으로 자동 fallback 한다.
 - Evaluator 가 `verdict:` 줄 없이 끝남 → `UNKNOWN` 으로 기록되고 루프는 계속.
   `prompts/evaluator.md` 의 마지막 섹션이 수정되었다면 되돌린다.
 - Generator 가 `project/` 바깥 파일을 건드림 → 프롬프트 재강조.

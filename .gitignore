@@ -8,3 +8,6 @@ dist/
 build/
 workspace/runs/
 .DS_Store
+
+.vscode/
+.idae/

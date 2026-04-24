@@ -90,7 +90,11 @@ claude-hermes/
 Claude Code 세션의 프롬프트에 입력:
 
 ```
-/hermes briefs/example-todo-cli.md 5 todo
+# Iteration 1 진행
+/hermes briefs/example-todo-cli.md 1 todo
+
+# Iteration 2 진행, Iteration 시 PASS 가 나도 다음 Iteration 진행, 매 iteration 마다 plan 재실행
+/hermes briefs/example-todo-cli.md 2 todo, don't stop on PASS, replan every 1 iterations
 ```
 
 인자 규약:

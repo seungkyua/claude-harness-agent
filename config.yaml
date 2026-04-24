@@ -1,0 +1,25 @@
+# Hermes harness configuration
+# Override any field via CLI flags or a different --config file.
+
+# Iteration loop
+max_iterations: 5          # Maximum Generator↔Evaluator rounds
+stop_on_pass: false        # Stop early once Evaluator marks verdict: PASS
+replan_every: 1            # If > 0, re-run Planner every N iterations (0 = plan once)
+
+# Models per role (any Claude model id supported by Agent SDK)
+models:
+  planner:   claude-opus-4-7
+  generator: claude-sonnet-4-6
+  evaluator: claude-sonnet-4-6
+
+# Per-agent turn caps (hard ceiling inside one invocation)
+max_turns:
+  planner:   20
+  generator: 80
+  evaluator: 80
+
+# Permission mode for SDK (bypassPermissions = fully autonomous)
+permission_mode: bypassPermissions
+
+# Workspace layout (relative to project root unless absolute)
+workspace_root: workspace

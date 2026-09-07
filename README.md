@@ -1,4 +1,4 @@
-# claude-hermes
+# claude-harness-agent
 
 Planner ↔ Generator ↔ Evaluator 세 에이전트가 파일로만 통신하며 원하는
 프로그램을 자동으로 반복 개발하는 Claude Code 하네스.
@@ -149,6 +149,34 @@ brief.md ──► Planner ──► spec.md
                                     ──► Evaluator (iter 2)
                                     ...
 ```
+
+---
+
+## Resume: PASS 한 run 을 이어서 확장하기
+
+이미 `verdict: PASS` 까지 끝난 run 을 더 발전시키고 싶을 때, 브리프를 다시
+쓰지 않고 그 run 디렉토리를 그대로 넘겨서 이어갈 수 있다.
+
+```
+/ask-harness workspace/runs/20260907-133956-todo 2
+```
+
+- 첫 번째 인자가 브리프 **파일**이 아니라 이미 `spec.md` 를 가진 run
+  **디렉토리**이면 자동으로 resume 으로 처리된다. 새 run 디렉토리를 만들지
+  않고, `brief.md` 도 그대로 둔다.
+- 인자 구성은 새 run 과 동일하다 — `iterations`, `stop_on_pass`,
+  `replan_every` 모두 같은 방식으로 넘긴다. **사람이 "이 기능을 추가해줘"
+  같은 요구사항 텍스트를 따로 넘기지 않는다.**
+- 대신 resume 이 시작될 때 **Planner 가 한 번 반드시 호출되어**, 기존
+  `spec.md`/`reports/latest.md`/`project/README.md` 를 보고 다음에 추가하면
+  좋을 기능·사용성 개선을 **스스로 창의적으로** 정해 `spec.md` 에 새
+  마일스톤/인수 기준으로 추가한다. 이미 PASS 한 부분은 그대로 두고, 원래
+  브리프의 `## Out of scope` 는 존중한다.
+- 이후 반복 번호는 기존 `reports/iter_NN.md` 의 최댓값 다음부터 이어진다
+  (예: iter_02 까지 있었다면 이번 실행은 iter_03 부터).
+- 사람이 구체적으로 무엇을 추가할지 정해서 시키고 싶다면, resume 대신
+  그 내용을 브리프/`spec.md`에 직접 반영한 뒤 실행하거나 새 run 을 여는
+  편이 더 명확하다.
 
 ---
 

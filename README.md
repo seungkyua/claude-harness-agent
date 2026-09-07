@@ -19,8 +19,8 @@ claude-hermes/
 │   │   ├── generator.md    # spec + 피드백 → project/
 │   │   └── evaluator.md    # project → reports/iter_NN.md (verdict: PASS|FAIL)
 │   └── skills/
-│       └── hermes/
-│           └── SKILL.md    # /hermes 가 루프 오케스트레이션
+│       └── ask-harness/
+│           └── SKILL.md    # /ask-harness 가 루프 오케스트레이션
 ├── briefs/                 # 당신이 쓰는 한 장짜리 요청서들
 │   └── example-todo-cli.md
 ├── workspace/
@@ -30,7 +30,7 @@ claude-hermes/
 
 ### 동작 원리
 
-1. 사용자가 Claude Code 세션에서 `/hermes <brief> [iterations]` 를 친다.
+1. 사용자가 Claude Code 세션에서 `/ask-harness <brief> [iterations]` 를 친다.
 2. 메인 대화가 **skill** 을 로드하여 오케스트레이터 역할을 맡는다.
 3. 오케스트레이터는 `Task` 툴로 **sub-agent** 들을 호출한다:
    `planner` → (`generator` → `evaluator`) × N
@@ -48,7 +48,7 @@ claude-hermes/
   리포트의 **마지막 줄** 은 반드시 `verdict: PASS` 또는 `verdict: FAIL`.
 - **write-first 리포트.** Evaluator 의 첫 tool call 은 항상 skeleton 리포트를
   `verdict: FAIL` 로 먼저 쓰는 것. 도중에 중단돼도 보수적 결과가 남는다.
-- **설정 가능한 iteration.** `/hermes` 호출 시 두 번째 인자로 지정.
+- **설정 가능한 iteration.** `/ask-harness` 호출 시 두 번째 인자로 지정.
 
 ---
 
@@ -73,7 +73,7 @@ claude-hermes/
    ```
 
    Claude Code 가 이 디렉토리에서 열리면 `.claude/agents/` 와
-   `.claude/skills/hermes/` 를 자동 인식한다.
+   `.claude/skills/ask-harness/` 를 자동 인식한다.
 
 ---
 
@@ -85,16 +85,16 @@ claude-hermes/
 `briefs/example-todo-cli.md` 를 참고. Brief 는 "무엇을 왜" 까지만 적는다.
 스택·파일 구조·라이브러리 선택은 Planner 가 한다.
 
-### 2. `/hermes` 로 실행
+### 2. `/ask-harness` 로 실행
 
 Claude Code 세션의 프롬프트에 입력:
 
 ```
 # Iteration 1 진행
-/hermes briefs/example-todo-cli.md 1 todo
+/ask-harness briefs/example-todo-cli.md 1 todo
 
 # Iteration 2 진행, Iteration 시 PASS 가 나도 다음 Iteration 진행, 매 iteration 마다 plan 재실행
-/hermes briefs/example-todo-cli.md 2 todo, don't stop on PASS, replan every 1 iterations
+/ask-harness briefs/example-todo-cli.md 2 todo, don't stop on PASS, replan every 1 iterations
 ```
 
 인자 규약:
@@ -105,7 +105,7 @@ Claude Code 세션의 프롬프트에 입력:
 | 2    | iterations  | —    | `5`    | Generator↔Evaluator 최대 라운드          |
 | 3    | label       | —    | 없음   | run 디렉토리 이름 뒤에 붙일 짧은 태그    |
 
-자연어 호출도 된다: "run hermes on briefs/foo.md for 3 iterations".
+자연어 호출도 된다: "run ask-harness on briefs/foo.md for 3 iterations".
 
 진행 중에는 main 대화가 sub-agent 를 호출할 때마다 Task 툴의 상태가 UI 에
 표시된다. Planner (약 1 분) → Generator (2~5 분) → Evaluator (2~5 분) 순으로
@@ -189,8 +189,8 @@ brief.md ──► Planner ──► spec.md
 
 ## 트러블슈팅
 
-- **`/hermes` 를 쳤는데 skill 을 못 찾는다** → Claude Code 를 **이 프로젝트
-  루트** (`claude-hermes/`) 에서 실행했는지 확인. `.claude/skills/hermes/SKILL.md`
+- **`/ask-harness` 를 쳤는데 skill 을 못 찾는다** → Claude Code 를 **이 프로젝트
+  루트** (`claude-hermes/`) 에서 실행했는지 확인. `.claude/skills/ask-harness/SKILL.md`
   가 존재해야 한다.
 - **Sub-agent 이름(planner/generator/evaluator)을 못 찾는다** →
   `.claude/agents/*.md` 파일 존재 확인. 파일 이름과 프론트매터의 `name:` 이
